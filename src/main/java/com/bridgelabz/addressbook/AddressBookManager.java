@@ -1,5 +1,9 @@
 package com.bridgelabz.addressbook;
 
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -20,7 +24,7 @@ public class AddressBookManager {
 
 
 
-	public void start() {
+	public void start() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
 		boolean found = false;
 		System.out.println("Welcome to Address Book Program\n");
 		int choice, addressBookNumber = -1;

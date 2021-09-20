@@ -4,17 +4,24 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 
 public class AddressBookIOService {
     private static final String filePath = "Address_Books/";
 
-    public static void WriteContactsToFile(HashMap<String, Contact> contactList, String addressBookName,IOService ioservice) {
+    public static void WriteContactsToFile(HashMap<String, Contact> contactList, String addressBookName,IOService ioservice) throws IOException, CsvDataTypeMismatchException,
+            CsvRequiredFieldEmptyException {
         try {
             if(ioservice == IOService.FILE_IO) {
                 String s = "firstName, lastName, address, city, state, zip, phoneNumber, email";
@@ -24,22 +31,16 @@ public class AddressBookIOService {
                 }
                 Path tempFile = Paths.get(playPath + "/" + addressBookName);
 
-                StringBuffer empBuffer = new StringBuffer();
-                contactList.forEach((name, contact) -> {
-                    String employeeDataString = contact.getFirstName()
-                            + "|" + contact.getLastName()
-                            + "|" + contact.getAddress()
-                            + "|" + contact.getCity()
-                            + "|" + contact.getState()
-                            + "|" + contact.getZip()
-                            + "|" + contact.getPhoneNumber()
-                            + "|" + contact.getEmail()
-                            + "\n";
+                try (
+                        Writer writer = Files.newBufferedWriter(tempFile)
+                ) {
+                    StatefulBeanToCsv<Contact> beanToCsv = new StatefulBeanToCsvBuilder<Contact>(writer)
+                            .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
+                            .withSeparator('|')
+                            .build();
 
-                    empBuffer.append(employeeDataString);
-                });
-
-                Files.write(Paths.get(String.valueOf(tempFile)), empBuffer.toString().getBytes());
+                    beanToCsv.write(new ArrayList<Contact>(contactList.values()));
+                }
                 System.out.println("Contacts are sucessfully saved");
             }
         } catch (IOException e) {
