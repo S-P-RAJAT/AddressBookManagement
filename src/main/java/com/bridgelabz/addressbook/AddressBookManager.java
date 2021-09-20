@@ -3,7 +3,7 @@ package com.bridgelabz.addressbook;
 import java.util.*;
 import java.util.function.Predicate;
 
-//import static com.bridgelabz.addressbook.AddressBookIOService.WriteContactsToFile;
+import static com.bridgelabz.addressbook.AddressBookIOService.WriteContactsToFile;
 import static com.bridgelabz.addressbook.AddressBookIOService.readData;
 
 enum IOService {
@@ -144,10 +144,10 @@ public class AddressBookManager {
 				}
 				break;
 			case 6:
-//				for (AddressBookIF addressBookInstance :
-//						addressBook) {
-////					WriteContactsToFile(addressBookInstance.getContactList(),addressBookInstance.getAddressBookName(),IOService.FILE_IO);
-//				}
+				for (AddressBookIF addressBookInstance :
+						addressBook) {
+					WriteContactsToFile(addressBookInstance.getContactList(),addressBookInstance.getAddressBookName(),IOService.FILE_IO);
+				}
 				break;
 
 			default:
