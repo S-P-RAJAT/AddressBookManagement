@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 public class AddressBookImpl implements AddressBookIF, Serializable {
 
     public AddressBook addressBook;
-    int index;
     static final Scanner sc = AddressBookManager.sc;
     static final HashMap<String, List<Contact>> contactNamesByCity = AddressBookManager.contactNamesByCity;
     static final HashMap<String, List<Contact>> contactNamesByState = AddressBookManager.contactNamesByState;
@@ -17,7 +16,6 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
 
         super();
         this.addressBook = new AddressBook(addressBookName, new HashMap<String, Contact>());
-        this.index = -1;
     }
 
     @Override

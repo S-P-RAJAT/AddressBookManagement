@@ -5,9 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gson.Gson;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -20,29 +22,38 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 public class AddressBookIOService {
     private static final String filePath = "Address_Books/";
 
-    public static void WriteContactsToFile(HashMap<String, Contact> contactList, String addressBookName,IOService ioservice) throws IOException, CsvDataTypeMismatchException,
+    public static void WriteContactsToFile(List<AddressBookIF> addressBookList,IOService ioservice) throws IOException, CsvDataTypeMismatchException,
             CsvRequiredFieldEmptyException {
         try {
             if(ioservice == IOService.FILE_IO) {
-                String s = "firstName, lastName, address, city, state, zip, phoneNumber, email";
-                Path playPath = Paths.get(filePath);
-                if (Files.notExists(playPath)) {
-                    Files.createDirectory(playPath);
-                }
-                Path tempFile = Paths.get(playPath + "/" + addressBookName);
+                for (AddressBookIF addressBook : addressBookList) {
 
-                try (
-                        Writer writer = Files.newBufferedWriter(tempFile)
-                ) {
-                    StatefulBeanToCsv<Contact> beanToCsv = new StatefulBeanToCsvBuilder<Contact>(writer)
-                            .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
-                            .withSeparator('|')
-                            .build();
+                    String s = "firstName, lastName, address, city, state, zip, phoneNumber, email";
+                    Path playPath = Paths.get(filePath);
+                    if (Files.notExists(playPath)) {
+                        Files.createDirectory(playPath);
+                    }
+                    Path tempFile = Paths.get(playPath + "/" + addressBook.getAddressBookName());
 
-                    beanToCsv.write(new ArrayList<Contact>(contactList.values()));
+                    try (
+                            Writer writer = Files.newBufferedWriter(tempFile)
+                    ) {
+                        StatefulBeanToCsv<Contact> beanToCsv = new StatefulBeanToCsvBuilder<Contact>(writer)
+                                .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
+                                .withSeparator('|')
+                                .build();
+
+                        beanToCsv.write(new ArrayList<Contact>(addressBook.getContactList().values()));
+                    }
+                    System.out.println("Contacts are sucessfully saved");
                 }
-                System.out.println("Contacts are sucessfully saved");
-            }
+            } else if( ioservice==IOService.JSON_IO) {
+            Gson gson=new Gson();
+            String json=gson.toJson(addressBookList);
+            FileWriter writer =new FileWriter("Address_Books_Json/"+"AddressBooks.json");
+            writer.write(json);
+            writer.close();
+        }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,10 +69,10 @@ public class AddressBookIOService {
                     File[] listOfFiles = addressBookPath.toFile().listFiles();
                     for (File file : listOfFiles) {
 
-                        String addressBookName = file.getName();
+                        String addressBookName = file.getName().split("[.]")[0];
                         AddressBookIF newAddressBook = new AddressBookImpl(addressBookName);
                         addressBook.add(newAddressBook);
-                        Path newPath = Paths.get(filePath+"/"+addressBookName);
+                        Path newPath = Paths.get(filePath+"/"+addressBookName+".csv");
                         Reader reader = Files.newBufferedReader(newPath);
                         CsvToBean<Contact> csvToBean =  new CsvToBeanBuilder<Contact>(reader)
                                 .withType(Contact.class)
@@ -75,6 +86,13 @@ public class AddressBookIOService {
                         }
                     }
                 }
+            } else if( ioservice==IOService.JSON_IO){
+                BufferedReader br = new BufferedReader(new FileReader("Address_Books_Json/"+"AddressBooks.json"));
+                Gson gson= new Gson();
+                AddressBookImpl[] usrObj =gson.fromJson(br, AddressBookImpl[].class);
+                List<AddressBookIF> addressBookList = Arrays.asList(usrObj);
+                addressBook.addAll(addressBookList);
+
             }
         } catch (IOException e) {
             e.printStackTrace();

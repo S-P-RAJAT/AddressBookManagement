@@ -11,7 +11,7 @@ import static com.bridgelabz.addressbook.AddressBookIOService.WriteContactsToFil
 import static com.bridgelabz.addressbook.AddressBookIOService.readData;
 
 enum IOService {
-	CONSOLE_IO, FILE_IO, DB_IO, REST_IO
+	CONSOLE_IO, FILE_IO, DB_IO, REST_IO, JSON_IO
 }
 
 public class AddressBookManager {
@@ -31,7 +31,7 @@ public class AddressBookManager {
 		contactNamesByCity = new HashMap<>();
 		contactNamesByState = new HashMap<>();
 		List<AddressBookIF> addressBook = new ArrayList<>();
-		readData(addressBook, IOService.FILE_IO);
+		readData(addressBook, IOService.JSON_IO);
 
 
 		do {
@@ -148,10 +148,8 @@ public class AddressBookManager {
 				}
 				break;
 			case 6:
-				for (AddressBookIF addressBookInstance :
-						addressBook) {
-					WriteContactsToFile(addressBookInstance.getContactList(),addressBookInstance.getAddressBookName(),IOService.FILE_IO);
-				}
+
+					WriteContactsToFile(addressBook,IOService.JSON_IO);
 				break;
 
 			default:
