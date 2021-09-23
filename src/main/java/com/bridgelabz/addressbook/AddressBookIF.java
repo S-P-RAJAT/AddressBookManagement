@@ -1,10 +1,9 @@
 package com.bridgelabz.addressbook;
 
 import java.util.HashMap;
+import java.util.List;
 
 public interface AddressBookIF {
-
-	String getAddressBookName();
 
 	HashMap<String, Contact> getContactList();
 
@@ -22,7 +21,9 @@ public interface AddressBookIF {
 
 	boolean isAddressBookEmpty();
 
-	void openAddressBook();
+	void setAddressBook(AddressBook addressBook);
+
+	void openAddressBook(AddressBook addressBook);
 
 	void sortedByName();
 

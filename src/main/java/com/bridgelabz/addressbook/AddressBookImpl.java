@@ -12,17 +12,6 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
     static final HashMap<String, List<Contact>> contactNamesByCity = AddressBookManager.contactNamesByCity;
     static final HashMap<String, List<Contact>> contactNamesByState = AddressBookManager.contactNamesByState;
 
-    public AddressBookImpl(String addressBookName) {
-
-        super();
-        this.addressBook = new AddressBook(addressBookName, new HashMap<String, Contact>());
-    }
-
-    @Override
-    public String getAddressBookName() {
-        return addressBook.name;
-    }
-
     @Override
     public HashMap<String, Contact> getContactList() {
         return addressBook.contactList;
@@ -121,6 +110,7 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
                     String newCity = sc.nextLine();
                     contactNamesByCity.get(contact.getCity()).remove(contact);
                     contact.setCity(newCity);
+                    contactNamesByCity.computeIfAbsent(contact.getCity(), k -> new LinkedList<Contact>());
                     contactNamesByCity.get(contact.getCity()).add(contact);
                     break;
                 case 5:
@@ -128,6 +118,7 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
                     String newState = sc.nextLine();
                     contactNamesByState.get(contact.getState()).remove(contact);
                     contact.setState(newState);
+                    contactNamesByState.computeIfAbsent(contact.getState(), k -> new LinkedList<Contact>());
                     contactNamesByState.get(contact.getState()).add(contact);
 
                     break;
@@ -253,7 +244,12 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
         }
     }
 
-    public void openAddressBook() {
+    public void setAddressBook(AddressBook addressBook) {
+        this.addressBook = addressBook;
+    }
+
+    public void openAddressBook(AddressBook addressBook) {
+        setAddressBook(addressBook);
         int choice;
         do {
             System.out.println(

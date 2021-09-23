@@ -13,5 +13,8 @@ public class AddressBook implements Serializable {
 		this.contactList = contactList;
 		
 	}
+	public String getAddressBookName() {
+		return this.name;
+	}
 
 }

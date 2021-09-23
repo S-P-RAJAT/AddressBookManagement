@@ -16,21 +16,27 @@ enum IOService {
 
 public class AddressBookManager {
 	public static final Scanner sc = new Scanner(System.in);
+
 	public static final int[] bookCount = {0};
 
-	public static HashMap<String, List<Contact>> contactNamesByCity;
-	public static HashMap<String, List<Contact>> contactNamesByState;
+	List<AddressBook> addressBook;
+	public static HashMap<String, List<Contact>> contactNamesByCity = new HashMap<>();
+	public static HashMap<String, List<Contact>> contactNamesByState = new HashMap<>();
+	public static final AddressBookIF addressBookService = new AddressBookImpl();
+
+
 	private static final String filePath ="./";
 
+	public AddressBookManager() {
+		this.addressBook = new ArrayList<AddressBook>();
+
+	}
 
 
 	public void start() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
 		boolean found = false;
 		System.out.println("Welcome to Address Book Program\n");
 		int choice, addressBookNumber = -1;
-		contactNamesByCity = new HashMap<>();
-		contactNamesByState = new HashMap<>();
-		List<AddressBookIF> addressBook = new ArrayList<>();
 		readData(addressBook, IOService.JSON_IO);
 
 
@@ -45,7 +51,7 @@ public class AddressBookManager {
 					sc.nextLine();
 					System.out.print("Enter the address book name: ");
 					String addressBookName = sc.nextLine();
-					addressBook.add(new AddressBookImpl(addressBookName));
+					addressBook.add(new AddressBook(addressBookName,new HashMap<>()));
 
 				break;
 
@@ -53,8 +59,8 @@ public class AddressBookManager {
 				sc.nextLine();
 				System.out.print("Enter the address book name: ");
 				String bookName = sc.nextLine();
-				Predicate<AddressBookIF> addressBookNamePredicate = n -> n.getAddressBookName().equals(bookName);
-				AddressBookIF addressBookObject = addressBook.stream()
+				Predicate<AddressBook> addressBookNamePredicate = n -> n.getAddressBookName().equals(bookName);
+				AddressBook addressBookObject = addressBook.stream()
 						.filter(addressBookNamePredicate)
 						.findFirst()
 						.orElse(null);
@@ -62,7 +68,7 @@ public class AddressBookManager {
 				if (addressBookObject ==null) {
 					System.out.println("No book with such name exists!");
 				} else{
-					addressBookObject.openAddressBook();
+					addressBookService.openAddressBook(addressBookObject);
 				}
 				break;
 
