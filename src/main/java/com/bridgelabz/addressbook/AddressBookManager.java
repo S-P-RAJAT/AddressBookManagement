@@ -4,10 +4,11 @@ import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static com.bridgelabz.addressbook.AddressBookIOService.WriteContactsToFile;
+import static com.bridgelabz.addressbook.AddressBookIOService.WriteContacts;
 import static com.bridgelabz.addressbook.AddressBookIOService.readData;
 
 enum IOService {
@@ -37,7 +38,12 @@ public class AddressBookManager {
 		boolean found = false;
 		System.out.println("Welcome to Address Book Program\n");
 		int choice, addressBookNumber = -1;
-		readData(addressBook, IOService.JSON_IO);
+		AddressBookDBService addressBookDBService = new AddressBookDBService();
+		try {
+			addressBook = addressBookDBService.readData();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
 
 		do {
@@ -155,7 +161,7 @@ public class AddressBookManager {
 				break;
 			case 6:
 
-					WriteContactsToFile(addressBook,IOService.JSON_IO);
+					WriteContacts(addressBook,IOService.JSON_IO);
 				break;
 
 			default:

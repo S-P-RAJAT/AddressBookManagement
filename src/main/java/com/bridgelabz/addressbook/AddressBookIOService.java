@@ -21,7 +21,7 @@ public class AddressBookIOService {
     private static final String filePath = "Address_Books/";
     public static final AddressBookIF addressBookService = AddressBookManager.addressBookService;
 
-    public static void WriteContactsToFile(List<AddressBook> addressBookList, IOService ioservice) throws CsvDataTypeMismatchException,
+    public static void WriteContacts(List<AddressBook> addressBookList, IOService ioservice) throws CsvDataTypeMismatchException,
             CsvRequiredFieldEmptyException {
         try {
             if (ioservice == IOService.FILE_IO) {
@@ -50,9 +50,11 @@ public class AddressBookIOService {
             } else if (ioservice == IOService.JSON_IO) {
                 Gson gson = new Gson();
                 String json = gson.toJson(addressBookList);
-                FileWriter writer = new FileWriter("Address_Books_Json/" + "AddressBooks.json");
+                FileWriter writer = new FileWriter("AddressBooks.json");
                 writer.write(json);
                 writer.close();
+            }
+            else if (ioservice == IOService.DB_IO) {
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,7 +89,7 @@ public class AddressBookIOService {
                     }
                 }
             } else if (ioservice == IOService.JSON_IO) {
-                BufferedReader br = new BufferedReader(new FileReader("Address_Books_Json/" + "AddressBooks.json"));
+                BufferedReader br = new BufferedReader(new FileReader("AddressBooks.json"));
                 Gson gson = new Gson();
                 AddressBook[] jsonAddressBookList = gson.fromJson(br, AddressBook[].class);
                 for (AddressBook addressBook : jsonAddressBookList) {
