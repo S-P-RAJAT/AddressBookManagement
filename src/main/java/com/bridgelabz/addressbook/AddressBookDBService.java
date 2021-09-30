@@ -8,7 +8,8 @@ import java.util.List;
 public class AddressBookDBService {
     public static AddressBookIF addressBookService;
     private static AddressBookDBService addressBookDBService;
-    private PreparedStatement updateContactPreparedStatement;
+    private PreparedStatement contactAddedGivenRangeStatement;
+    private PreparedStatement contactsInGivenCityOrStateStatement;
 
     public static AddressBookDBService getInstance() {
         if (addressBookDBService == null)
@@ -52,7 +53,10 @@ public class AddressBookDBService {
                 addressBookList.add(newAddressBook);
                 addressBookService.setAddressBook(newAddressBook);
 
-                setContactData(result);
+                while (result.next()) {
+                    Contact contact = this.getContactData(result);
+                    addressBookService.addContact(contact);
+                }
             }
             connection.close();
         } catch (SQLException e) {
@@ -61,8 +65,7 @@ public class AddressBookDBService {
         return addressBookList;
     }
 
-    private void setContactData(ResultSet result) throws SQLException {
-        while (result.next()) {
+    private Contact getContactData(ResultSet result) throws SQLException {
             String firstName = result.getString("first_name");
             String lastName = result.getString("last_name");
             String address = result.getString("address");
@@ -71,9 +74,8 @@ public class AddressBookDBService {
             int zip = result.getInt("zip");
             long phoneNumber = result.getLong("phone_number");
             String email = result.getString("email");
-            Contact contact = new Contact(firstName, lastName, address, city, state, zip, phoneNumber, email);
-            addressBookService.addContact(contact);
-        }
+
+        return new Contact(firstName, lastName, address, city, state, zip, phoneNumber, email);
     }
 
 
@@ -94,5 +96,34 @@ public class AddressBookDBService {
         return 0;
     }
 
+    private void preparedStatementToretriveContactsInRange() {
+        try {
+            Connection connection = this.getConnection();
+            String query = "select * from contact NATURAL JOIN address where date_added between ? and ?";
+            contactAddedGivenRangeStatement = connection.prepareStatement(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Contact> readContactsAddedInRange(Date startDate, Date endDate) {
+        if (contactAddedGivenRangeStatement == null) {
+            this.preparedStatementToretriveContactsInRange();
+        }
+        try {
+            contactAddedGivenRangeStatement.setDate(1, startDate);
+            contactAddedGivenRangeStatement.setDate(2, endDate);
+            ResultSet resultSet = contactAddedGivenRangeStatement.executeQuery();
+            List<Contact> contactList= new ArrayList<>();
+            while (resultSet.next()) {
+                Contact contact = getContactData(resultSet);
+                contactList.add(contact);
+            }
+            return contactList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }
