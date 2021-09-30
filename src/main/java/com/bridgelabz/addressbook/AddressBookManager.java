@@ -13,7 +13,7 @@ import static com.bridgelabz.addressbook.AddressBookIOService.readData;
 import static com.bridgelabz.addressbook.IOService.DB_IO;
 
 enum IOService {
-	CONSOLE_IO, FILE_IO, DB_IO, REST_IO, JSON_IO
+	CONSOLE_IO, CSV_IO, DB_IO, REST_IO, JSON_IO
 }
 
 public class AddressBookManager {
@@ -30,13 +30,13 @@ public class AddressBookManager {
 	private static final String filePath ="./";
 
 	public AddressBookManager() {
-		this.addressBook = new ArrayList<AddressBook>();
+		this.addressBook = new ArrayList<>();
 
 	}
 
 
 	public void start() throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException, IOException {
-		boolean found = false;
+		boolean found;
 		System.out.println("Welcome to Address Book Program\n");
 		int choice, addressBookNumber = -1;
 		addressBook = readData(IOService.DB_IO);
