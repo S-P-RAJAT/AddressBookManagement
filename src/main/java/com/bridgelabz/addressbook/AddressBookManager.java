@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 
 import static com.bridgelabz.addressbook.AddressBookIOService.WriteContacts;
 import static com.bridgelabz.addressbook.AddressBookIOService.readData;
+import static com.bridgelabz.addressbook.IOService.DB_IO;
 
 enum IOService {
 	CONSOLE_IO, FILE_IO, DB_IO, REST_IO, JSON_IO
@@ -38,12 +39,7 @@ public class AddressBookManager {
 		boolean found = false;
 		System.out.println("Welcome to Address Book Program\n");
 		int choice, addressBookNumber = -1;
-		AddressBookDBService addressBookDBService = new AddressBookDBService();
-		try {
-			addressBook = addressBookDBService.readData();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		addressBook = readData(IOService.DB_IO);
 
 
 		do {

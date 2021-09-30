@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,8 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 public class AddressBookIOService {
     private static final String filePath = "Address_Books/";
     public static final AddressBookIF addressBookService = AddressBookManager.addressBookService;
+    private static AddressBookDBService addressBookDBService = AddressBookDBService.getInstance();
+
 
     public static void WriteContacts(List<AddressBook> addressBookList, IOService ioservice) throws CsvDataTypeMismatchException,
             CsvRequiredFieldEmptyException {
@@ -63,7 +66,8 @@ public class AddressBookIOService {
 
     }
 
-    public static void readData(List<AddressBook> addressBookList, IOService ioservice) {
+    public static List<AddressBook> readData( IOService ioservice) {
+        List<AddressBook> addressBookList = new ArrayList<AddressBook>();
         try {
             if (ioservice == IOService.FILE_IO) {
                 Path addressBookPath = Paths.get(filePath);
@@ -99,12 +103,14 @@ public class AddressBookIOService {
                        addressBookService.addContact(contact);
                     }
                 }
+            } else if (ioservice == IOService.DB_IO) {
+                addressBookList = addressBookDBService.readData();
             }
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
+        return addressBookList;
     }
-
 }
 
 

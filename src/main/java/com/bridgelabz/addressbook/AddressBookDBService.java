@@ -8,6 +8,16 @@ import java.util.List;
 
 public class AddressBookDBService {
     public static final AddressBookIF addressBookService = AddressBookManager.addressBookService;
+    private static AddressBookDBService addressBookDBService;
+
+    public static AddressBookDBService getInstance() {
+        if(addressBookDBService == null)
+            addressBookDBService = new AddressBookDBService();
+        return addressBookDBService;
+    }
+    private AddressBookDBService() {
+
+    }
 
     private Connection getConnection() throws SQLException {
         String jdbcURL = "jdbc:mysql://localhost:3306/address_book_service?useSSL=false";
