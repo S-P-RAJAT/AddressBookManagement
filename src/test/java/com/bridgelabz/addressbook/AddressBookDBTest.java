@@ -47,4 +47,26 @@ public class AddressBookDBTest {
                 Date.valueOf(endDate));
         Assert.assertEquals(2, contacts.size());
     }
+    @Test
+    public void givenCity_WhenCorrect_RetrieveAllContactsInCity() {
+        AddressBookDBService addressBookDBService =AddressBookDBService.getInstance();
+        String city = "Bangalore";
+        List<Contact> contacts = addressBookDBService.readContactsFromGivenCity(city);
+        Assert.assertEquals(2, contacts.size());
+    }
+    @Test
+    public void givenState_WhenCorrect_RetrieveAllContactsInState() {
+        AddressBookDBService addressBookDBService =AddressBookDBService.getInstance();
+        String state = "Karnataka";
+        List<Contact> contacts = addressBookDBService.readContactsFromGivenState(state);
+        Assert.assertEquals(2, contacts.size());
+    }
+    @Test
+    public void givenCityAndState_WhenCorrect_RetrieveAllContactsInCityAndState() {
+        AddressBookDBService addressBookDBService =AddressBookDBService.getInstance();
+        String city = "Bangalore";
+        String state = "Karnataka";
+        List<Contact> contacts = addressBookDBService.readContactsFromGivenCityAndState(city, state);
+        Assert.assertEquals(2, contacts.size());
+    }
 }

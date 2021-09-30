@@ -126,4 +126,15 @@ public class AddressBookDBService {
         return null;
     }
 
+    public List<Contact> readContactsFromGivenCity(String city) {
+        return null;
+    }
+
+    public List<Contact> readContactsFromGivenState(String state) {
+        return null;
+    }
+
+    public List<Contact> readContactsFromGivenCityAndState(String city, String state) {
+        return null;
+    }
 }
