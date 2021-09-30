@@ -50,9 +50,9 @@ public class AddressBookDBTest {
     @Test
     public void givenCity_WhenCorrect_RetrieveAllContactsInCity() {
         AddressBookDBService addressBookDBService =AddressBookDBService.getInstance();
-        String city = "Bangalore";
+        String city = "Mumbai";
         List<Contact> contacts = addressBookDBService.readContactsFromGivenCity(city);
-        Assert.assertEquals(2, contacts.size());
+        Assert.assertEquals(1, contacts.size());
     }
     @Test
     public void givenState_WhenCorrect_RetrieveAllContactsInState() {

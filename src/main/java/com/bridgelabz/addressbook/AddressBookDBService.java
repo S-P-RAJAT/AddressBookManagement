@@ -105,6 +105,15 @@ public class AddressBookDBService {
             e.printStackTrace();
         }
     }
+    private void preparedStatementToRetrieveContactsInGivenCityOrState() {
+        try {
+            Connection connection = this.getConnection();
+            String query = "select * from contact NATURAL JOIN address where city LIKE ? and state LIKE ?;";
+            contactsInGivenCityOrStateStatement = connection.prepareStatement(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public List<Contact> readContactsAddedInRange(Date startDate, Date endDate) {
         if (contactAddedGivenRangeStatement == null) {
@@ -127,14 +136,62 @@ public class AddressBookDBService {
     }
 
     public List<Contact> readContactsFromGivenCity(String city) {
+        if (contactsInGivenCityOrStateStatement == null) {
+            this.preparedStatementToRetrieveContactsInGivenCityOrState();
+        }
+        try {
+            contactsInGivenCityOrStateStatement.setString(1, city);
+            contactsInGivenCityOrStateStatement.setString(2, "%");
+            ResultSet resultSet = contactsInGivenCityOrStateStatement.executeQuery();
+            List<Contact> contactList= new ArrayList<>();
+            while (resultSet.next()) {
+                Contact contact = getContactData(resultSet);
+                contactList.add(contact);
+            }
+            return contactList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     public List<Contact> readContactsFromGivenState(String state) {
+        if (contactsInGivenCityOrStateStatement == null) {
+            this.preparedStatementToRetrieveContactsInGivenCityOrState();
+        }
+        try {
+            contactsInGivenCityOrStateStatement.setString(1, "%");
+            contactsInGivenCityOrStateStatement.setString(2, state);
+            ResultSet resultSet = contactsInGivenCityOrStateStatement.executeQuery();
+            List<Contact> contactList= new ArrayList<>();
+            while (resultSet.next()) {
+                Contact contact = getContactData(resultSet);
+                contactList.add(contact);
+            }
+            return contactList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     public List<Contact> readContactsFromGivenCityAndState(String city, String state) {
+        if (contactsInGivenCityOrStateStatement == null) {
+            this.preparedStatementToRetrieveContactsInGivenCityOrState();
+        }
+        try {
+            contactsInGivenCityOrStateStatement.setString(1, city);
+            contactsInGivenCityOrStateStatement.setString(2, state);
+            ResultSet resultSet = contactsInGivenCityOrStateStatement.executeQuery();
+            List<Contact> contactList= new ArrayList<>();
+            while (resultSet.next()) {
+                Contact contact = getContactData(resultSet);
+                contactList.add(contact);
+            }
+            return contactList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }
