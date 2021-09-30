@@ -11,6 +11,8 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
     static final Scanner sc = AddressBookManager.sc;
     static final HashMap<String, List<Contact>> contactNamesByCity = AddressBookManager.contactNamesByCity;
     static final HashMap<String, List<Contact>> contactNamesByState = AddressBookManager.contactNamesByState;
+    public static final AddressBookDBService addressBookDBService = AddressBookDBService.getInstance();
+
 
     @Override
     public HashMap<String, Contact> getContactList() {
@@ -18,17 +20,24 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
     }
 
     @Override
+    public Contact getContact(String firstName, String lastName) {
+        return addressBook.contactList.values().stream()
+                .filter(p->p.getFirstName().equals(firstName)&&p.getLastName().equals(lastName))
+                .findFirst()
+                .orElse(null);
+    }
+    @Override
     public void addContact(Contact contact) {
         addressBook.contactList.put(contact.getFirstName() + " " + contact.getLastName(), contact);
-        contactNamesByCity.computeIfAbsent(contact.getCity(), k -> new LinkedList<Contact>());
+        contactNamesByCity.computeIfAbsent(contact.getCity(), k -> new LinkedList<>());
         contactNamesByCity.get(contact.getCity()).add(addressBook.contactList.get(contact.getFirstName()+" "+contact.getLastName()));
 
-        contactNamesByState.computeIfAbsent(contact.getState(), k -> new LinkedList<Contact>());
+        contactNamesByState.computeIfAbsent(contact.getState(), k -> new LinkedList<>());
         contactNamesByState.get(contact.getState()).add(addressBook.contactList.get(contact.getFirstName()+" "+contact.getLastName()));
     }
 
 
-
+    @Override
     public void createContact() {
 
         HashMap<String, String> map = new HashMap<>();
@@ -76,13 +85,7 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
                     if (addressBook.contactList.get(newFirstName + " " + lastName) != null) {
                         System.out.println("Duplicate entry! Contact already exists");
                     } else {
-                        addressBook.contactList.remove(name);
-
-                        addContact(new Contact(newFirstName, lastName, contact.getAddress(), contact.getCity(),
-                                contact.getState(), contact.getZip(), contact.getPhoneNumber(),
-                                contact.getEmail()));
-                        System.out.println("Contact Details are added!\n"
-                                + addressBook.contactList.get(newFirstName + " " + lastName));
+                        updateFirstName(firstName, lastName, contact, newFirstName);
                     }
 
                     break;
@@ -92,50 +95,38 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
                     if (addressBook.contactList.get(firstName + " " + newLastName) != null) {
                         System.out.println("Duplicate entry! Contact already exists");
                     } else {
-                        addressBook.contactList.remove(name);
-                        addContact(new Contact(firstName, newLastName, contact.getAddress(), contact.getCity(),
-                                contact.getState(), contact.getZip(), contact.getPhoneNumber(),
-                                contact.getEmail()));
-                        System.out.println("Contact Details are added!\n"
-                                + addressBook.contactList.get(firstName + " " + newLastName));
+                        updateLastName(firstName, lastName, contact, newLastName);
                     }
                     break;
                 case 3:
                     System.out.println("Enter new Address: ");
                     String newAddress = sc.nextLine();
-                    contact.setAddress(newAddress);
+                    updateAddress(firstName, lastName, contact, newAddress);
                     break;
                 case 4:
                     System.out.println("Enter new City: ");
                     String newCity = sc.nextLine();
-                    contactNamesByCity.get(contact.getCity()).remove(contact);
-                    contact.setCity(newCity);
-                    contactNamesByCity.computeIfAbsent(contact.getCity(), k -> new LinkedList<Contact>());
-                    contactNamesByCity.get(contact.getCity()).add(contact);
+                    updateCity(firstName, lastName, contact, newCity);
                     break;
                 case 5:
                     System.out.println("Enter new State: ");
                     String newState = sc.nextLine();
-                    contactNamesByState.get(contact.getState()).remove(contact);
-                    contact.setState(newState);
-                    contactNamesByState.computeIfAbsent(contact.getState(), k -> new LinkedList<Contact>());
-                    contactNamesByState.get(contact.getState()).add(contact);
-
+                    updateState(firstName, lastName, contact, newState);
                     break;
                 case 6:
                     System.out.println("Enter new ZipCode: ");
                     int newZip = sc.nextInt();
-                    contact.setZip(newZip);
+                    updateZipCode(firstName, lastName, contact, newZip);
                     break;
                 case 7:
                     System.out.println("Enter new Phone Number: ");
-                    long newPhoneNum = sc.nextLong();
-                    contact.setPhoneNumber(newPhoneNum);
+                    long newPhoneNumber = sc.nextLong();
+                    updatePhoneNumber(firstName, lastName, contact, newPhoneNumber);
                     break;
                 case 8:
                     System.out.println("Enter new Email Id: ");
                     String newEmail = sc.nextLine();
-                    contact.setEmail(newEmail);
+                    updateEmail(firstName, lastName, contact, newEmail);
                     break;
                 case 9:
                     break;
@@ -146,6 +137,71 @@ public class AddressBookImpl implements AddressBookIF, Serializable {
             System.out.println("No contact with such name exists!");
         }
 
+    }
+
+    @Override
+    public void updateEmail(String firstName, String lastName, Contact contact, String newEmail) {
+        contact.setEmail(newEmail);
+        addressBookDBService.updateContactInDatabase(firstName, lastName, " email = \""+ newEmail + "\"");
+    }
+
+    @Override
+    public void updatePhoneNumber(String firstName, String lastName, Contact contact, long newPhoneNumber) {
+        contact.setPhoneNumber(newPhoneNumber);
+        addressBookDBService.updateContactInDatabase(firstName, lastName, " phone_number = \""+ newPhoneNumber + "\"");
+    }
+
+    @Override
+    public void updateZipCode(String firstName, String lastName, Contact contact, int newZip) {
+        contact.setZip(newZip);
+        addressBookDBService.updateContactInDatabase(firstName, lastName, " zip = \""+ newZip + "\"");
+    }
+
+    @Override
+    public void updateState(String firstName, String lastName, Contact contact, String newState) {
+        contactNamesByState.get(contact.getState()).remove(contact);
+        contact.setState(newState);
+        contactNamesByState.computeIfAbsent(contact.getState(), k -> new LinkedList<>());
+        contactNamesByState.get(contact.getState()).add(contact);
+        addressBookDBService.updateContactInDatabase(firstName, lastName, " state = \""+ newState + "\"");
+    }
+
+    @Override
+    public void updateCity(String firstName, String lastName, Contact contact, String newCity) {
+        contactNamesByCity.get(contact.getCity()).remove(contact);
+        contact.setCity(newCity);
+        contactNamesByCity.computeIfAbsent(contact.getCity(), k -> new LinkedList<>());
+        contactNamesByCity.get(contact.getCity()).add(contact);
+        addressBookDBService.updateContactInDatabase(firstName, lastName, " city = \""+ newCity + "\"");
+    }
+
+    @Override
+    public void updateAddress(String firstName, String lastName, Contact contact, String newAddress) {
+        contact.setAddress(newAddress);
+        addressBookDBService.updateContactInDatabase(firstName, lastName, " address = \""+ newAddress + "\"");
+    }
+
+    @Override
+    public void updateLastName(String firstName, String lastName, Contact contact, String newLastName) {
+        addressBook.contactList.remove(firstName + " " + newLastName);
+        addContact(new Contact(firstName, newLastName, contact.getAddress(), contact.getCity(),
+                contact.getState(), contact.getZip(), contact.getPhoneNumber(),
+                contact.getEmail()));
+        System.out.println("Contact Details are added!\n"
+                + addressBook.contactList.get(firstName + " " + newLastName));
+        addressBookDBService.updateContactInDatabase(firstName, lastName, " last_name = \""+ newLastName + "\"");
+    }
+
+    @Override
+    public void updateFirstName(String firstName, String lastName, Contact contact, String newFirstName) {
+        addressBook.contactList.remove(newFirstName + " " + lastName);
+
+        addContact(new Contact(newFirstName, lastName, contact.getAddress(), contact.getCity(),
+                contact.getState(), contact.getZip(), contact.getPhoneNumber(),
+                contact.getEmail()));
+        System.out.println("Contact Details are added!\n"
+                + addressBook.contactList.get(newFirstName + " " + lastName));
+        addressBookDBService.updateContactInDatabase(firstName, lastName, " first_name = \""+ newFirstName + "\"");
     }
 
     @Override

@@ -1,22 +1,23 @@
 package com.bridgelabz.addressbook;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class AddressBookDBService {
-    public static final AddressBookIF addressBookService = AddressBookManager.addressBookService;
+    public static AddressBookIF addressBookService;
     private static AddressBookDBService addressBookDBService;
+    private PreparedStatement updateContactPreparedStatement;
 
     public static AddressBookDBService getInstance() {
-        if(addressBookDBService == null)
+        if (addressBookDBService == null)
             addressBookDBService = new AddressBookDBService();
         return addressBookDBService;
     }
-    private AddressBookDBService() {
 
+    private AddressBookDBService() {
+        addressBookService = new AddressBookImpl();
     }
 
     private Connection getConnection() throws SQLException {
@@ -31,7 +32,8 @@ public class AddressBookDBService {
 
         return connection;
     }
-    public List<AddressBook> readData() throws SQLException {
+
+    public List<AddressBook> readContactsFromDatabase() throws SQLException {
         String sql = "SELECT book_name from address_book";
         List<AddressBook> addressBookList = new ArrayList<>();
         try {
@@ -40,25 +42,17 @@ public class AddressBookDBService {
             ResultSet resultForBookName = statementForBookName.executeQuery(sql);
             while (resultForBookName.next()) {
                 String bookName = resultForBookName.getString("book_name");
-                String sql2 = "SELECT DISTINCT first_name,last_name, address, city, state, zip, phone_number, email FROM contact NATURAL JOIN address NATURAL JOIN address_book NATURAL JOIN contact_type NATURAL JOIN type where book_name = \"" + bookName + "\"";
+                String sql2 = "SELECT DISTINCT first_name,last_name, address, city, state, zip,"
+                        + " phone_number, email FROM contact NATURAL JOIN address NATURAL JOIN"
+                        + " address_book NATURAL JOIN contact_type NATURAL JOIN type where book_name = \""
+                        + bookName + "\"";
                 Statement statement = connection.createStatement();
                 ResultSet result = statement.executeQuery(sql2);
                 AddressBook newAddressBook = new AddressBook(bookName, new HashMap<>());
                 addressBookList.add(newAddressBook);
                 addressBookService.setAddressBook(newAddressBook);
 
-                while (result.next()) {
-                    String firstName = result.getString("first_name");
-                    String lastName = result.getString("last_name");
-                    String address = result.getString("address");
-                    String city = result.getString("city");
-                    String state = result.getString("state");
-                    int zip = result.getInt("zip");
-                    long phoneNumber = result.getLong("phone_number");
-                    String email = result.getString("email");
-                    Contact contact = new Contact(firstName, lastName, address, city, state, zip, phoneNumber, email);
-                    addressBookService.addContact(contact);
-                }
+                setContactData(result);
             }
             connection.close();
         } catch (SQLException e) {
@@ -66,4 +60,39 @@ public class AddressBookDBService {
         }
         return addressBookList;
     }
+
+    private void setContactData(ResultSet result) throws SQLException {
+        while (result.next()) {
+            String firstName = result.getString("first_name");
+            String lastName = result.getString("last_name");
+            String address = result.getString("address");
+            String city = result.getString("city");
+            String state = result.getString("state");
+            int zip = result.getInt("zip");
+            long phoneNumber = result.getLong("phone_number");
+            String email = result.getString("email");
+            Contact contact = new Contact(firstName, lastName, address, city, state, zip, phoneNumber, email);
+            addressBookService.addContact(contact);
+        }
+    }
+
+
+    public int updateContactInDatabase(String firstName, String lastName, String updateSting) {
+        return this.updateContactUsingStatement(firstName, lastName, updateSting);
+    }
+
+    private int updateContactUsingStatement(String firstName, String lastName, String updateSting) {
+        String sql = String.format(
+                "Update contact NATURAL JOIN address set %s where first_name = \"%s\" and last_name  =  \"%s\";",
+                updateSting, firstName, lastName);
+        try (Connection connection = this.getConnection()) {
+            Statement statement = connection.createStatement();
+            return statement.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
 }

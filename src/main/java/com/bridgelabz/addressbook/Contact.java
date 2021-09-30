@@ -3,6 +3,7 @@ package com.bridgelabz.addressbook;
 import com.opencsv.bean.CsvBindByPosition;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Contact implements Serializable {
 
@@ -114,4 +115,13 @@ public class Contact implements Serializable {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Contact contact = (Contact) o;
+		return zip == contact.zip && phoneNumber == contact.phoneNumber && Objects.equals(firstName, contact.firstName) && Objects.equals(lastName, contact.lastName) && Objects.equals(address, contact.address) && Objects.equals(city, contact.city) && Objects.equals(state, contact.state) && Objects.equals(email, contact.email);
+	}
+
 }
