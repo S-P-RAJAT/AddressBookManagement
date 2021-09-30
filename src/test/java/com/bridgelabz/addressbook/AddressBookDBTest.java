@@ -1,6 +1,8 @@
 package com.bridgelabz.addressbook;
 
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.sql.SQLException;
@@ -35,5 +37,14 @@ public class AddressBookDBTest {
         Assert.assertEquals(contact, addressBookList.get(0).contactList.get("Rajat" + " " + "S P"));
 
 
+    }
+    @Test
+    public void givenDateRange_WhenCorrect_RetrieveAllContactsAdded() {
+        AddressBookDBService addressBookDBService =AddressBookDBService.getInstance();
+        LocalDate startDate = LocalDate.of(2021, 9, 19);
+        LocalDate endDate = LocalDate.of(2021, 9, 26);
+        List<Contact> contacts = addressBookDBService.readContactsAddedInRange(Date.valueOf(startDate),
+                Date.valueOf(endDate));
+        Assert.assertEquals(2, contacts.size());
     }
 }
